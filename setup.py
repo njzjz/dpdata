@@ -12,7 +12,7 @@ except ImportError:
         readme = f.read()
 
 # install_requires = ['xml']
-install_requires=['numpy', 'monty']
+install_requires = ['numpy', 'monty']
 
 setuptools.setup(
     name="dpdata",
@@ -24,12 +24,12 @@ setuptools.setup(
     long_description=readme,
     long_description_content_type="text/markdown",
     url="https://github.com/deepmodeling/dpdata",
-    packages=['dpdata', 'dpdata/vasp', 'dpdata/lammps', 'dpdata/md', 'dpdata/deepmd', 'dpdata/pwscf', 'dpdata/gaussian'],
+    packages=['dpdata', 'dpdata/vasp', 'dpdata/lammps', 'dpdata/md',
+              'dpdata/deepmd', 'dpdata/pwscf', 'dpdata/gaussian'],
     classifiers=[
         "Programming Language :: Python :: 3.6",
         "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
     ],
     keywords='lammps vasp deepmd-kit',
-    install_requires=install_requires,    
+    install_requires=install_requires,
 )
-
