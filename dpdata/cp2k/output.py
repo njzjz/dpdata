@@ -4,8 +4,8 @@ import numpy as np
 def get_frames(fname):
     coord_flag = False
     force_flag = False
-    eV = 2.72113838565563E+01
-    angstrom = 5.29177208590000E-01
+    eV = 2.72113838565563e01
+    angstrom = 5.29177208590000e-01
     fp = open(fname)
     atom_symbol_list = []
     cell = []
@@ -13,34 +13,34 @@ def get_frames(fname):
     force = []
 
     for idx, ii in enumerate(fp):
-        if 'CELL| Vector' in ii:
+        if "CELL| Vector" in ii:
             cell.append(ii.split()[4:7])
-        if 'Atom  Kind  Element' in ii:
+        if "Atom  Kind  Element" in ii:
             coord_flag = True
             coord_idx = idx
         # get the coord block info
         if coord_flag:
-            if (idx > coord_idx + 1):
-                if (ii == '\n'):
+            if idx > coord_idx + 1:
+                if ii == "\n":
                     coord_flag = False
                 else:
                     coord.append(ii.split()[4:7])
                     atom_symbol_list.append(ii.split()[2])
-        if 'ENERGY|' in ii:
-            energy = (ii.split()[8])
-        if ' Atom   Kind ' in ii:
+        if "ENERGY|" in ii:
+            energy = ii.split()[8]
+        if " Atom   Kind " in ii:
             force_flag = True
             force_idx = idx
         if force_flag:
-            if (idx > force_idx):
-                if 'SUM OF ATOMIC FORCES' in ii:
+            if idx > force_idx:
+                if "SUM OF ATOMIC FORCES" in ii:
                     force_flag = False
                 else:
                     force.append(ii.split()[3:6])
     fp.close()
-    assert(coord), "cannot find coords"
-    assert(energy), "cannot find energies"
-    assert(force), "cannot find forces"
+    assert coord, "cannot find coords"
+    assert energy, "cannot find energies"
+    assert force, "cannot find forces"
 
     # conver to float array and add extra dimension for nframes
     cell = np.array(cell)
@@ -64,7 +64,7 @@ def get_frames(fname):
     atom_names = atom_symbol_list[np.sort(symbol_idx)]
     for jj in atom_symbol_list:
         for idx, ii in enumerate(atom_names):
-            if (jj == ii):
+            if jj == ii:
                 atom_types.append(idx)
     for idx in range(len(atom_names)):
         atom_numbs.append(atom_types.count(idx))

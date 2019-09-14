@@ -17,8 +17,8 @@ from monty.serialization import loadfn, dumpfn
 from dpdata.periodic_table import Element
 
 
-class System (MSONable):
-    '''
+class System(MSONable):
+    """
     The data System
 
     A data System (a concept used by `deepmd-kit <https://github.com/deepmodeling/deepmd-kit>`_)
@@ -40,15 +40,11 @@ class System (MSONable):
     Restrictions:
         - `d_example['orig']` is always [0, 0, 0]
         - `d_example['cells'][ii]` is always lower triangular (lammps cell tensor convention)
-    '''
+    """
 
-    def __init__(self,
-                 file_name=None,
-                 fmt='auto',
-                 type_map=None,
-                 begin=0,
-                 step=1,
-                 data=None):
+    def __init__(
+        self, file_name=None, fmt="auto", type_map=None, begin=0, step=1, data=None
+    ):
         """
         Constructor
 
@@ -77,12 +73,12 @@ class System (MSONable):
              The raw data of System class.
         """
         self.data = {}
-        self.data['atom_numbs'] = []
-        self.data['atom_names'] = []
-        self.data['atom_types'] = []
-        self.data['orig'] = np.array([0, 0, 0])
-        self.data['cells'] = []
-        self.data['coords'] = []
+        self.data["atom_numbs"] = []
+        self.data["atom_names"] = []
+        self.data["atom_types"] = []
+        self.data["orig"] = np.array([0, 0, 0])
+        self.data["cells"] = []
+        self.data["coords"] = []
 
         if data:
             check_System(data)
@@ -90,23 +86,27 @@ class System (MSONable):
             return
         if file_name is None:
             return
-        if fmt == 'auto':
-            fmt = os.path.basename(file_name).split('.')[-1]
-        if fmt == 'lmp' or fmt == 'lammps/lmp':
+        if fmt == "auto":
+            fmt = os.path.basename(file_name).split(".")[-1]
+        if fmt == "lmp" or fmt == "lammps/lmp":
             self.from_lammps_lmp(file_name, type_map=type_map)
-        elif fmt == 'dump' or fmt == 'lammps/dump':
-            self.from_lammps_dump(
-                file_name, type_map=type_map, begin=begin, step=step)
-        elif fmt.lower() == 'poscar' or fmt.lower() == 'contcar' or fmt.lower() == 'vasp/poscar' or fmt.lower() == 'vasp/contcar':
+        elif fmt == "dump" or fmt == "lammps/dump":
+            self.from_lammps_dump(file_name, type_map=type_map, begin=begin, step=step)
+        elif (
+            fmt.lower() == "poscar"
+            or fmt.lower() == "contcar"
+            or fmt.lower() == "vasp/poscar"
+            or fmt.lower() == "vasp/contcar"
+        ):
             self.from_vasp_poscar(file_name)
-        elif fmt == 'deepmd' or fmt == 'deepmd/raw':
+        elif fmt == "deepmd" or fmt == "deepmd/raw":
             self.from_deepmd_raw(file_name, type_map=type_map)
-        elif fmt == 'deepmd/npy':
+        elif fmt == "deepmd/npy":
             self.from_deepmd_comp(file_name, type_map=type_map)
-        elif fmt == 'pwscf/traj':
+        elif fmt == "pwscf/traj":
             self.from_pwscf_traj(file_name, begin=begin, step=step)
         else:
-            raise RuntimeError('unknow data format ' + fmt)
+            raise RuntimeError("unknow data format " + fmt)
 
         if type_map is not None:
             self.apply_type_map(type_map)
@@ -122,8 +122,8 @@ class System (MSONable):
         ret += "\nAtom Numbers      : %d" % self.get_natoms()
         ret += "\nElement List      :"
         ret += "\n-------------------"
-        ret += "\n"+"  ".join(map(str, self.get_atom_names()))
-        ret += "\n"+"  ".join(map(str, self.get_atom_numbs()))
+        ret += "\n" + "  ".join(map(str, self.get_atom_names()))
+        ret += "\n" + "  ".join(map(str, self.get_atom_numbs()))
         return ret
 
     def __getitem__(self, key):
@@ -144,12 +144,12 @@ class System (MSONable):
             self_copy.append(other_copy)
         elif isinstance(others, list):
             for ii in others:
-                assert(isinstance(ii, System))
+                assert isinstance(ii, System)
                 ii_copy = ii.copy()
                 self_copy.append(ii_copy)
         else:
             raise RuntimeError("Unspported data structure")
-        return self.__class__.from_dict({'data': self_copy.data})
+        return self.__class__.from_dict({"data": self_copy.data})
 
     def dump(self, filename, indent=4):
         """dump .json or .yaml file """
@@ -180,8 +180,7 @@ class System (MSONable):
             raise RuntimeError("Unknown format")
 
         if type_map is None:
-            type_map = elements_index_map(
-                self.get_atom_names().copy(), standard=True)
+            type_map = elements_index_map(self.get_atom_names().copy(), standard=True)
 
         _set1 = set(self.get_atom_names())
         _set2 = set(list(type_map.keys()))
@@ -189,9 +188,10 @@ class System (MSONable):
 
         atom_types_list = []
         for name, numb in zip(self.get_atom_names(), self.get_atom_numbs()):
-            atom_types_list.extend([name]*numb)
-        new_atom_types = np.array([type_map[ii]
-                                   for ii in atom_types_list], dtype=np.int)
+            atom_types_list.extend([name] * numb)
+        new_atom_types = np.array(
+            [type_map[ii] for ii in atom_types_list], dtype=np.int
+        )
 
         return new_atom_types
 
@@ -216,35 +216,36 @@ class System (MSONable):
 
     def as_dict(self):
         """Returns data dict of System instance"""
-        d = {"@module": self.__class__.__module__,
-             "@class": self.__class__.__name__,
-             "data": self.data
-             }
+        d = {
+            "@module": self.__class__.__module__,
+            "@class": self.__class__.__name__,
+            "data": self.data,
+        }
         return d
 
     def get_atom_names(self):
         """Returns name of atoms """
-        return self.data['atom_names']
+        return self.data["atom_names"]
 
     def get_atom_types(self):
         """Returns type of atoms """
-        return self.data['atom_types']
+        return self.data["atom_types"]
 
     def get_atom_numbs(self):
         """Returns number of atoms """
-        return self.data['atom_numbs']
+        return self.data["atom_numbs"]
 
     def get_nframes(self):
         """Returns number of frames in the system"""
-        return len(self.data['cells'])
+        return len(self.data["cells"])
 
     def get_natoms(self):
         """Returns total number of atoms in the system"""
-        return len(self.data['atom_types'])
+        return len(self.data["atom_types"])
 
     def copy(self):
         """Returns a copy of the system.  """
-        return self.__class__.from_dict({'data': deepcopy(self.data)})
+        return self.__class__.from_dict({"data": deepcopy(self.data)})
 
     def sub_system(self, f_idx):
         """
@@ -261,10 +262,10 @@ class System (MSONable):
             The subsystem
         """
         tmp = System()
-        for ii in ['atom_numbs', 'atom_names', 'atom_types', 'orig']:
+        for ii in ["atom_numbs", "atom_names", "atom_types", "orig"]:
             tmp.data[ii] = self.data[ii]
-        tmp.data['cells'] = self.data['cells'][f_idx]
-        tmp.data['coords'] = self.data['coords'][f_idx]
+        tmp.data["cells"] = self.data["cells"][f_idx]
+        tmp.data["coords"] = self.data["coords"][f_idx]
         return tmp
 
     def append(self, system):
@@ -276,28 +277,28 @@ class System (MSONable):
         system : System
             The system to append
         """
-        if not len(system.data['atom_numbs']):
+        if not len(system.data["atom_numbs"]):
             # skip if the system to append is non-converged
             return False
-        elif not len(self.data['atom_numbs']):
+        elif not len(self.data["atom_numbs"]):
             # this system is non-converged but the system to append is converged
             self.data = system.data
             return False
-        assert(system.formula == self.formula)
-        if system.data['atom_names'] != self.data['atom_names']:
+        assert system.formula == self.formula
+        if system.data["atom_names"] != self.data["atom_names"]:
             # allow to append a system with different atom_names order
             system.sort_atom_names()
             self.sort_atom_names()
-        if (system.data['atom_types'] != self.data['atom_types']).any():
+        if (system.data["atom_types"] != self.data["atom_types"]).any():
             # allow to append a system with different atom_types order
             system.sort_atom_types()
             self.sort_atom_types()
-        for ii in ['atom_numbs', 'atom_names']:
-            assert(system.data[ii] == self.data[ii])
-        for ii in ['atom_types', 'orig']:
-            eq = (system.data[ii] == self.data[ii])
-            assert(eq.all())
-        for ii in ['coords', 'cells']:
+        for ii in ["atom_numbs", "atom_names"]:
+            assert system.data[ii] == self.data[ii]
+        for ii in ["atom_types", "orig"]:
+            eq = system.data[ii] == self.data[ii]
+            assert eq.all()
+        for ii in ["coords", "cells"]:
             self.data[ii] = np.concatenate((self.data[ii], system[ii]), axis=0)
         return True
 
@@ -315,7 +316,7 @@ class System (MSONable):
         if type_map is not None:
             # assign atom_names index to the specify order
             # atom_names must be a subset of type_map
-            assert (set(self.data['atom_names']).issubset(set(type_map)))
+            assert set(self.data["atom_names"]).issubset(set(type_map))
             # for the condition that type_map is a proper superset of atom_names
             new_atoms = set(type_map) - set(self.data["atom_names"])
             if new_atoms:
@@ -324,15 +325,14 @@ class System (MSONable):
             # a[as[a]] == b[as[b]]  as == argsort
             # as[as[b]] == as^{-1}[b]
             # a[as[a][as[as[b]]]] = b[as[b][as^{-1}[b]]] = b[id]
-            idx = np.argsort(self.data['atom_names'])[
-                np.argsort(np.argsort(type_map))]
+            idx = np.argsort(self.data["atom_names"])[np.argsort(np.argsort(type_map))]
         else:
             # index that will sort an array by alphabetical order
-            idx = np.argsort(self.data['atom_names'])
+            idx = np.argsort(self.data["atom_names"])
         # sort atom_names, atom_numbs, atom_types by idx
-        self.data['atom_names'] = list(np.array(self.data['atom_names'])[idx])
-        self.data['atom_numbs'] = list(np.array(self.data['atom_numbs'])[idx])
-        self.data['atom_types'] = np.argsort(idx)[self.data['atom_types']]
+        self.data["atom_names"] = list(np.array(self.data["atom_names"])[idx])
+        self.data["atom_numbs"] = list(np.array(self.data["atom_numbs"])[idx])
+        self.data["atom_types"] = np.argsort(idx)[self.data["atom_types"]]
 
     def check_type_map(self, type_map):
         """
@@ -344,19 +344,19 @@ class System (MSONable):
         type_map : list
             type_map       
         """
-        if type_map is not None and type_map != self.data['atom_names']:
+        if type_map is not None and type_map != self.data["atom_names"]:
             self.sort_atom_names(type_map=type_map)
 
     def apply_type_map(self, type_map):
         if type_map is not None and type(type_map) is list:
             self.check_type_map(type_map)
         else:
-            raise RuntimeError('invalid type map, cannot be applied')
+            raise RuntimeError("invalid type map, cannot be applied")
 
     def sort_atom_types(self):
-        idx = np.argsort(self.data['atom_types'])
-        self.data['atom_types'] = self.data['atom_types'][idx]
-        self.data['coords'] = self.data['coords'][:, idx]
+        idx = np.argsort(self.data["atom_types"])
+        self.data["atom_types"] = self.data["atom_types"][idx]
+        self.data["coords"] = self.data["coords"][:, idx]
         return idx
 
     @property
@@ -364,8 +364,14 @@ class System (MSONable):
         """
         Return the formula of this system, like C3H5O2
         """
-        return ''.join(["{}{}".format(symbol, numb) for symbol, numb in sorted(
-            zip(self.data['atom_names'], self.data['atom_numbs']))])
+        return "".join(
+            [
+                "{}{}".format(symbol, numb)
+                for symbol, numb in sorted(
+                    zip(self.data["atom_names"], self.data["atom_numbs"])
+                )
+            ]
+        )
 
     def extend(self, systems):
         """
@@ -384,14 +390,13 @@ class System (MSONable):
         """
         Append periodic boundary condition
         """
-        ncoord = dpdata.md.pbc.dir_coord(
-            self.data['coords'], self.data['cells'])
+        ncoord = dpdata.md.pbc.dir_coord(self.data["coords"], self.data["cells"])
         ncoord = ncoord % 1
-        self.data['coords'] = np.matmul(ncoord, self.data['cells'])
+        self.data["coords"] = np.matmul(ncoord, self.data["cells"])
 
     def from_lammps_lmp(self, file_name, type_map=None):
         with open(file_name) as fp:
-            lines = [line.rstrip('\n') for line in fp]
+            lines = [line.rstrip("\n") for line in fp]
             self.data = dpdata.lammps.lmp.to_system_data(lines, type_map)
         self._shift_orig_zero()
 
@@ -406,23 +411,19 @@ class System (MSONable):
         frame_idx : int
             The index of the frame to dump
         """
-        assert(frame_idx < len(self.data['coords']))
+        assert frame_idx < len(self.data["coords"])
         w_str = dpdata.lammps.lmp.from_system_data(self.data, frame_idx)
-        with open(file_name, 'w') as fp:
+        with open(file_name, "w") as fp:
             fp.write(w_str)
 
-    def from_lammps_dump(self,
-                         file_name,
-                         type_map=None,
-                         begin=0,
-                         step=1):
+    def from_lammps_dump(self, file_name, type_map=None, begin=0, step=1):
         lines = dpdata.lammps.dump.load_file(file_name, begin=begin, step=step)
         self.data = dpdata.lammps.dump.system_data(lines, type_map)
         self._shift_orig_zero()
 
     def from_vasp_poscar(self, file_name):
         with open(file_name) as fp:
-            lines = [line.rstrip('\n') for line in fp]
+            lines = [line.rstrip("\n") for line in fp]
             self.data = dpdata.vasp.poscar.to_system_data(lines)
         self.rot_lower_triangular()
 
@@ -437,30 +438,29 @@ class System (MSONable):
         frame_idx : int
             The index of the frame to dump
         """
-        assert(frame_idx < len(self.data['coords']))
+        assert frame_idx < len(self.data["coords"])
         w_str = dpdata.vasp.poscar.from_system_data(self.data, frame_idx)
-        with open(file_name, 'w') as fp:
+        with open(file_name, "w") as fp:
             fp.write(w_str)
 
-    def from_pwscf_traj(self,
-                        prefix,
-                        begin=0,
-                        step=1):
+    def from_pwscf_traj(self, prefix, begin=0, step=1):
         self.data = dpdata.pwscf.traj.to_system_data(
-            prefix + '.in', prefix, begin=begin, step=step)
-        self.data['coords'] \
-            = dpdata.md.pbc.apply_pbc(self.data['coords'],
-                                      self.data['cells'],
-                                      )
+            prefix + ".in", prefix, begin=begin, step=step
+        )
+        self.data["coords"] = dpdata.md.pbc.apply_pbc(
+            self.data["coords"], self.data["cells"]
+        )
         self.rot_lower_triangular()
 
     def from_deepmd_comp(self, folder, type_map=None):
         self.data = dpdata.deepmd.comp.to_system_data(
-            folder, type_map=type_map, labels=False)
+            folder, type_map=type_map, labels=False
+        )
 
     def from_deepmd_raw(self, folder, type_map=None):
         tmp_data = dpdata.deepmd.raw.to_system_data(
-            folder, type_map=type_map, labels=False)
+            folder, type_map=type_map, labels=False
+        )
         if tmp_data is not None:
             self.data = tmp_data
 
@@ -482,9 +482,7 @@ class System (MSONable):
         prec: {numpy.float32, numpy.float64}
             The floating point precision of the compressed data
         """
-        dpdata.deepmd.comp.dump(folder, self.data,
-                                set_size=set_size,
-                                comp_prec=prec)
+        dpdata.deepmd.comp.dump(folder, self.data, set_size=set_size, comp_prec=prec)
 
     def to_deepmd_raw(self, folder):
         """
@@ -493,36 +491,35 @@ class System (MSONable):
         dpdata.deepmd.raw.dump(folder, self.data)
 
     def affine_map(self, trans, f_idx=0):
-        assert(np.linalg.det(trans) != 0)
-        self.data['cells'][f_idx] = np.matmul(self.data['cells'][f_idx], trans)
-        self.data['coords'][f_idx] = np.matmul(
-            self.data['coords'][f_idx], trans)
+        assert np.linalg.det(trans) != 0
+        self.data["cells"][f_idx] = np.matmul(self.data["cells"][f_idx], trans)
+        self.data["coords"][f_idx] = np.matmul(self.data["coords"][f_idx], trans)
 
     def _shift_orig_zero(self):
-        for ff in self.data['coords']:
+        for ff in self.data["coords"]:
             for ii in ff:
-                ii = ii - self.data['orig']
-        self.data['orig'] = self.data['orig'] - self.data['orig']
-        assert((np.zeros([3]) == self.data['orig']).all())
+                ii = ii - self.data["orig"]
+        self.data["orig"] = self.data["orig"] - self.data["orig"]
+        assert (np.zeros([3]) == self.data["orig"]).all()
 
     def rot_lower_triangular(self):
         for ii in range(self.get_nframes()):
             self.rot_frame_lower_triangular(ii)
 
     def rot_frame_lower_triangular(self, f_idx=0):
-        qq, rr = np.linalg.qr(self.data['cells'][f_idx].T)
+        qq, rr = np.linalg.qr(self.data["cells"][f_idx].T)
         if np.linalg.det(qq) < 0:
             qq = -qq
             rr = -rr
         self.affine_map(qq, f_idx=f_idx)
         rot = np.eye(3)
-        if self.data['cells'][f_idx][0][0] < 0:
+        if self.data["cells"][f_idx][0][0] < 0:
             rot[0][0] = -1
-        if self.data['cells'][f_idx][1][1] < 0:
+        if self.data["cells"][f_idx][1][1] < 0:
             rot[1][1] = -1
-        if self.data['cells'][f_idx][2][2] < 0:
+        if self.data["cells"][f_idx][2][2] < 0:
             rot[2][2] = -1
-        assert(np.linalg.det(rot) == 1)
+        assert np.linalg.det(rot) == 1
         self.affine_map(rot, f_idx=f_idx)
         return np.matmul(qq, rot)
 
@@ -530,12 +527,12 @@ class System (MSONable):
         """
         Add atom_names that do not exist.
         """
-        self.data['atom_names'].extend(atom_names)
-        self.data['atom_numbs'].extend([0 for _ in atom_names])
+        self.data["atom_names"].extend(atom_names)
+        self.data["atom_numbs"].extend([0 for _ in atom_names])
 
 
-class LabeledSystem (System):
-    '''
+class LabeledSystem(System):
+    """
     The labeled data System
 
     For example, a labeled water system named `d_example` has two molecules (6 atoms) and `nframes` frames. The labels can be accessed by
@@ -546,15 +543,11 @@ class LabeledSystem (System):
     It is noted that
         - The order of frames stored in `'energies'`, `'forces'` and `'virials'` should be consistent with `'atom_types'`, `'cells'` and `'coords'`.
         - The order of atoms in **every** frame of `'forces'` should be consistent with `'coords'` and `'atom_types'`.
-    '''
+    """
 
-    def __init__(self,
-                 file_name=None,
-                 fmt='auto',
-                 type_map=None,
-                 begin=0,
-                 step=1,
-                 data=None):
+    def __init__(
+        self, file_name=None, fmt="auto", type_map=None, begin=0, step=1, data=None
+    ):
         """
         Constructor
 
@@ -589,24 +582,24 @@ class LabeledSystem (System):
             return
         if file_name is None:
             return
-        if fmt == 'auto':
-            fmt = os.path.basename(file_name).split('.')[-1]
-        if fmt == 'xml' or fmt == 'XML' or fmt == 'vasp/xml':
+        if fmt == "auto":
+            fmt = os.path.basename(file_name).split(".")[-1]
+        if fmt == "xml" or fmt == "XML" or fmt == "vasp/xml":
             self.from_vasp_xml(file_name, begin=begin, step=step)
-        elif fmt == 'outcar' or fmt == 'OUTCAR' or fmt == 'vasp/outcar':
+        elif fmt == "outcar" or fmt == "OUTCAR" or fmt == "vasp/outcar":
             self.from_vasp_outcar(file_name, begin=begin, step=step)
-        elif fmt == 'deepmd' or fmt == 'deepmd/raw':
+        elif fmt == "deepmd" or fmt == "deepmd/raw":
             self.from_deepmd_raw(file_name, type_map=type_map)
-        elif fmt == 'deepmd/npy':
+        elif fmt == "deepmd/npy":
             self.from_deepmd_comp(file_name, type_map=type_map)
-        elif fmt == 'pwscf/traj':
+        elif fmt == "pwscf/traj":
             self.from_pwscf_traj(file_name, begin=begin, step=step)
-        elif fmt == 'gaussian/log':
+        elif fmt == "gaussian/log":
             self.from_gaussian_log(file_name)
-        elif fmt == 'cp2k/output':
+        elif fmt == "cp2k/output":
             self.from_cp2k_output(file_name)
         else:
-            raise RuntimeError('unknow data format ' + fmt)
+            raise RuntimeError("unknow data format " + fmt)
 
         if type_map is not None:
             self.apply_type_map(type_map)
@@ -624,8 +617,8 @@ class LabeledSystem (System):
         ret += "\nIncluding Virials  : %s" % status
         ret += "\nElement List       :"
         ret += "\n-------------------"
-        ret += "\n"+"  ".join(map(str, self.get_atom_names()))
-        ret += "\n"+"  ".join(map(str, self.get_atom_numbs()))
+        ret += "\n" + "  ".join(map(str, self.get_atom_names()))
+        ret += "\n" + "  ".join(map(str, self.get_atom_numbs()))
         return ret
 
     def __add__(self, others):
@@ -636,72 +629,70 @@ class LabeledSystem (System):
             self_copy.append(other_copy)
         elif isinstance(others, list):
             for ii in others:
-                assert(isinstance(ii, LabeledSystem))
+                assert isinstance(ii, LabeledSystem)
                 ii_copy = ii.copy()
                 self_copy.append(ii_copy)
         else:
             raise RuntimeError("Unspported data structure")
-        return self.__class__.from_dict({'data': self_copy.data})
+        return self.__class__.from_dict({"data": self_copy.data})
 
     def has_virial(self):
         # return ('virials' in self.data) and (len(self.data['virials']) > 0)
-        return ('virials' in self.data)
+        return "virials" in self.data
 
     def from_vasp_xml(self, file_name, begin=0, step=1):
-        self.data['atom_names'], \
-            self.data['atom_types'], \
-            self.data['cells'], \
-            self.data['coords'], \
-            self.data['energies'], \
-            self.data['forces'], \
-            self.data['virials'], \
-            = dpdata.vasp.xml.analyze(file_name, type_idx_zero=True, begin=begin, step=step)
-        self.data['atom_numbs'] = []
-        for ii in range(len(self.data['atom_names'])):
-            self.data['atom_numbs'].append(sum(self.data['atom_types'] == ii))
+        self.data["atom_names"], self.data["atom_types"], self.data["cells"], self.data[
+            "coords"
+        ], self.data["energies"], self.data["forces"], self.data[
+            "virials"
+        ], = dpdata.vasp.xml.analyze(
+            file_name, type_idx_zero=True, begin=begin, step=step
+        )
+        self.data["atom_numbs"] = []
+        for ii in range(len(self.data["atom_names"])):
+            self.data["atom_numbs"].append(sum(self.data["atom_types"] == ii))
         # the vasp xml assumes the direct coordinates
         # apply the transform to the cartesan coordinates
         for ii in range(self.get_nframes()):
-            self.data['coords'][ii] = np.matmul(
-                self.data['coords'][ii], self.data['cells'][ii])
+            self.data["coords"][ii] = np.matmul(
+                self.data["coords"][ii], self.data["cells"][ii]
+            )
         # scale virial to the unit of eV
         v_pref = 1 * 1e3 / 1.602176621e6
         for ii in range(self.get_nframes()):
-            vol = np.linalg.det(np.reshape(self.data['cells'][ii], [3, 3]))
-            self.data['virials'][ii] *= v_pref * vol
+            vol = np.linalg.det(np.reshape(self.data["cells"][ii], [3, 3]))
+            self.data["virials"][ii] *= v_pref * vol
         # rotate the system to lammps convention
         self.rot_lower_triangular()
 
     def from_vasp_outcar(self, file_name, begin=0, step=1):
         # with open(file_name) as fp:
         #     lines = [line.rstrip('\n') for line in fp]
-        self.data['atom_names'], \
-            self.data['atom_numbs'], \
-            self.data['atom_types'], \
-            self.data['cells'], \
-            self.data['coords'], \
-            self.data['energies'], \
-            self.data['forces'], \
-            tmp_virial, \
-            = dpdata.vasp.outcar.get_frames(file_name, begin=begin, step=step)
+        self.data["atom_names"], self.data["atom_numbs"], self.data[
+            "atom_types"
+        ], self.data["cells"], self.data["coords"], self.data["energies"], self.data[
+            "forces"
+        ], tmp_virial, = dpdata.vasp.outcar.get_frames(
+            file_name, begin=begin, step=step
+        )
         if tmp_virial is not None:
-            self.data['virials'] = tmp_virial
+            self.data["virials"] = tmp_virial
         # scale virial to the unit of eV
-        if 'virials' in self.data:
+        if "virials" in self.data:
             v_pref = 1 * 1e3 / 1.602176621e6
             for ii in range(self.get_nframes()):
-                vol = np.linalg.det(np.reshape(self.data['cells'][ii], [3, 3]))
-                self.data['virials'][ii] *= v_pref * vol
+                vol = np.linalg.det(np.reshape(self.data["cells"][ii], [3, 3]))
+                self.data["virials"][ii] *= v_pref * vol
         # rotate the system to lammps convention
         self.rot_lower_triangular()
 
     def affine_map_fv(self, trans, f_idx):
-        assert(np.linalg.det(trans) != 0)
-        self.data['forces'][f_idx] = np.matmul(
-            self.data['forces'][f_idx], trans)
+        assert np.linalg.det(trans) != 0
+        self.data["forces"][f_idx] = np.matmul(self.data["forces"][f_idx], trans)
         if self.has_virial():
-            self.data['virials'][f_idx] = np.matmul(
-                trans.T, np.matmul(self.data['virials'][f_idx], trans))
+            self.data["virials"][f_idx] = np.matmul(
+                trans.T, np.matmul(self.data["virials"][f_idx], trans)
+            )
 
     def rot_lower_triangular(self):
         for ii in range(self.get_nframes()):
@@ -714,42 +705,45 @@ class LabeledSystem (System):
 
     def from_deepmd_comp(self, folder, type_map=None):
         self.data = dpdata.deepmd.comp.to_system_data(
-            folder, type_map=type_map, labels=True)
+            folder, type_map=type_map, labels=True
+        )
 
     def from_deepmd_raw(self, folder, type_map=None):
         tmp_data = dpdata.deepmd.raw.to_system_data(
-            folder, type_map=type_map, labels=True)
+            folder, type_map=type_map, labels=True
+        )
         if tmp_data is not None:
             self.data = tmp_data
 
     def from_pwscf_traj(self, prefix, begin=0, step=1):
         self.data = dpdata.pwscf.traj.to_system_data(
-            prefix + '.in', prefix, begin=begin, step=step)
-        self.data['coords'] \
-            = dpdata.md.pbc.apply_pbc(self.data['coords'],
-                                      self.data['cells'],
-                                      )
-        self.data['energies'], self.data['forces'] \
-            = dpdata.pwscf.traj.to_system_label(prefix + '.in', prefix, begin=begin, step=step)
+            prefix + ".in", prefix, begin=begin, step=step
+        )
+        self.data["coords"] = dpdata.md.pbc.apply_pbc(
+            self.data["coords"], self.data["cells"]
+        )
+        self.data["energies"], self.data["forces"] = dpdata.pwscf.traj.to_system_label(
+            prefix + ".in", prefix, begin=begin, step=step
+        )
         self.rot_lower_triangular()
 
     def from_gaussian_log(self, file_name):
         try:
             self.data = dpdata.gaussian.log.to_system_data(file_name)
-            self.data['cells'] = np.array(
-                [[[100., 0., 0.], [0., 100., 0.], [0., 0., 100.]]])
+            self.data["cells"] = np.array(
+                [[[100.0, 0.0, 0.0], [0.0, 100.0, 0.0], [0.0, 0.0, 100.0]]]
+            )
         except AssertionError:
-            self.data['energies'], self.data['forces'] = [], []
+            self.data["energies"], self.data["forces"] = [], []
 
     def from_cp2k_output(self, file_name):
-        self.data['atom_names'], \
-            self.data['atom_numbs'], \
-            self.data['atom_types'], \
-            self.data['cells'], \
-            self.data['coords'], \
-            self.data['energies'], \
-            self.data['forces'], \
-            = dpdata.cp2k.output.get_frames(file_name)
+        self.data["atom_names"], self.data["atom_numbs"], self.data[
+            "atom_types"
+        ], self.data["cells"], self.data["coords"], self.data["energies"], self.data[
+            "forces"
+        ], = dpdata.cp2k.output.get_frames(
+            file_name
+        )
 
     def sub_system(self, f_idx):
         """
@@ -767,10 +761,10 @@ class LabeledSystem (System):
         """
         tmp_sys = LabeledSystem()
         tmp_sys.data = System.sub_system(self, f_idx).data
-        tmp_sys.data['energies'] = self.data['energies'][f_idx]
-        tmp_sys.data['forces'] = self.data['forces'][f_idx]
-        if 'virials' in self.data:
-            tmp_sys.data['virials'] = self.data['virials'][f_idx]
+        tmp_sys.data["energies"] = self.data["energies"][f_idx]
+        tmp_sys.data["forces"] = self.data["forces"][f_idx]
+        if "virials" in self.data:
+            tmp_sys.data["virials"] = self.data["virials"][f_idx]
         return tmp_sys
 
     def append(self, system):
@@ -785,29 +779,29 @@ class LabeledSystem (System):
         if not System.append(self, system):
             # skip if this system or the system to append is non-converged
             return
-        tgt = ['energies', 'forces']
-        for ii in ['atom_pref']:
+        tgt = ["energies", "forces"]
+        for ii in ["atom_pref"]:
             if ii in self.data:
                 tgt.append(ii)
-        if ('virials' in system.data) and ('virials' not in self.data):
-            raise RuntimeError('system has virial, but this does not')
-        if ('virials' not in system.data) and ('virials' in self.data):
-            raise RuntimeError('this has virial, but system does not')
-        if 'virials' in system.data:
-            tgt.append('virials')
+        if ("virials" in system.data) and ("virials" not in self.data):
+            raise RuntimeError("system has virial, but this does not")
+        if ("virials" not in system.data) and ("virials" in self.data):
+            raise RuntimeError("this has virial, but system does not")
+        if "virials" in system.data:
+            tgt.append("virials")
         for ii in tgt:
             self.data[ii] = np.concatenate((self.data[ii], system[ii]), axis=0)
 
     def sort_atom_types(self):
         idx = System.sort_atom_types(self)
-        self.data['forces'] = self.data['forces'][:, idx]
-        for ii in ['atom_pref']:
+        self.data["forces"] = self.data["forces"][:, idx]
+        for ii in ["atom_pref"]:
             if ii in self.data:
                 self.data[ii] = self.data[ii][:, idx]
 
 
 class MultiSystems:
-    '''A set containing several systems.'''
+    """A set containing several systems."""
 
     def __init__(self, *systems, type_map=None):
         """
@@ -838,7 +832,9 @@ class MultiSystems:
         return self.__str__()
 
     def __str__(self):
-        return 'MultiSystems ({} systems containing {} frames)'.format(len(self.systems), self.get_nframes())
+        return "MultiSystems ({} systems containing {} frames)".format(
+            len(self.systems), self.get_nframes()
+        )
 
     def __add__(self, others):
         """magic method "+" operation """
@@ -924,44 +920,56 @@ class MultiSystems:
             The floating point precision of the compressed data
         """
         for system_name, system in self.systems.items():
-            system.to_deepmd_npy(os.path.join(folder, system_name),
-                                 set_size=set_size,
-                                 prec=prec)
+            system.to_deepmd_npy(
+                os.path.join(folder, system_name), set_size=set_size, prec=prec
+            )
 
 
 def check_System(data):
-    keys = {'atom_names', 'atom_numbs',
-            'cells', 'coords', 'orig', 'atom_types'}
-    assert(isinstance(data, dict))
-    assert(set(data.keys()) == keys)
-    if len(data['coords']) > 0:
-        assert(len(data['coords'][0]) == len(
-            data['atom_types']) == sum(data['atom_numbs']))
+    keys = {"atom_names", "atom_numbs", "cells", "coords", "orig", "atom_types"}
+    assert isinstance(data, dict)
+    assert set(data.keys()) == keys
+    if len(data["coords"]) > 0:
+        assert (
+            len(data["coords"][0]) == len(data["atom_types"]) == sum(data["atom_numbs"])
+        )
     else:
-        assert(len(data['atom_types']) == sum(data['atom_numbs']))
-    assert(len(data['cells']) == len(data['coords']))
-    assert(len(data['atom_names']) == len(data['atom_numbs']))
+        assert len(data["atom_types"]) == sum(data["atom_numbs"])
+    assert len(data["cells"]) == len(data["coords"])
+    assert len(data["atom_names"]) == len(data["atom_numbs"])
 
 
 def check_LabeledSystem(data):
-    keys = {'atom_names', 'atom_numbs', 'atom_types', 'cells', 'coords', 'energies',
-            'forces', 'orig'}
+    keys = {
+        "atom_names",
+        "atom_numbs",
+        "atom_types",
+        "cells",
+        "coords",
+        "energies",
+        "forces",
+        "orig",
+    }
 
-    assert(keys.issubset(set(data.keys())))
-    assert(isinstance(data, dict))
-    assert(len(data['atom_names']) == len(data['atom_numbs']))
+    assert keys.issubset(set(data.keys()))
+    assert isinstance(data, dict)
+    assert len(data["atom_names"]) == len(data["atom_numbs"])
 
-    if len(data['coords']) > 0:
-        assert(len(data['coords'][0]) == len(
-            data['atom_types']) == sum(data['atom_numbs']))
+    if len(data["coords"]) > 0:
+        assert (
+            len(data["coords"][0]) == len(data["atom_types"]) == sum(data["atom_numbs"])
+        )
     else:
-        assert(len(data['atom_types']) == sum(data['atom_numbs']))
-    if 'virials' in data:
-        assert(len(data['cells']) == len(data['coords']) ==
-               len(data['virials']) == len(data['energies']))
+        assert len(data["atom_types"]) == sum(data["atom_numbs"])
+    if "virials" in data:
+        assert (
+            len(data["cells"])
+            == len(data["coords"])
+            == len(data["virials"])
+            == len(data["energies"])
+        )
     else:
-        assert(len(data['cells']) == len(
-            data['coords']) == len(data['energies']))
+        assert len(data["cells"]) == len(data["coords"]) == len(data["energies"])
 
 
 def elements_index_map(elements, standard=False, inverse=False):
