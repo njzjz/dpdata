@@ -25,9 +25,9 @@ class TestVaspPOSCARTypeMap(unittest.TestCase, CompSys):
         sys0.data["atom_names"] = ["A", "H", "B", "O", "D"]
         sys0.data["atom_numbs"] = [0, 1, 0, 1, 0]
         sys0.data["atom_types"] = np.array([3, 1], dtype=int)
-        sys1 = dpdata.System(
-            "poscars/POSCAR.oh.d", fmt="vasp/poscar", type_map=["A", "H", "B", "O", "D"]
-        )
+        sys1 = dpdata.System("poscars/POSCAR.oh.d",
+                             fmt="vasp/poscar",
+                             type_map=["A", "H", "B", "O", "D"])
         self.system_1 = sys0
         self.system_2 = sys1
         self.places = 6

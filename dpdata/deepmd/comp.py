@@ -65,11 +65,8 @@ def dump(folder, data, set_size=5000, comp_prec=np.float32, remove_sets=True):
                 shutil.rmtree(ii)
         else:
             raise RuntimeError(
-                "found "
-                + str(sets)
-                + " in "
-                + folder
-                + "not a clean deepmd raw dir. please firstly clean set.* then try compress"
+                "found " + str(sets) + " in " + folder +
+                "not a clean deepmd raw dir. please firstly clean set.* then try compress"
             )
     # dump raw
     np.savetxt(os.path.join(folder, "type.raw"), data["atom_types"], fmt="%d")
@@ -87,7 +84,8 @@ def dump(folder, data, set_size=5000, comp_prec=np.float32, remove_sets=True):
     if "virials" in data:
         virials = np.reshape(data["virials"], [nframes, 9]).astype(comp_prec)
     if "atom_pref" in data:
-        atom_pref = np.reshape(data["atom_pref"], [nframes, -1]).astype(comp_prec)
+        atom_pref = np.reshape(data["atom_pref"],
+                               [nframes, -1]).astype(comp_prec)
     # dump frame properties: cell, coord, energy, force and virial
     nsets = nframes // set_size
     if set_size * nsets < nframes:
@@ -104,6 +102,8 @@ def dump(folder, data, set_size=5000, comp_prec=np.float32, remove_sets=True):
         if forces is not None:
             np.save(os.path.join(set_folder, "force"), forces[set_stt:set_end])
         if virials is not None:
-            np.save(os.path.join(set_folder, "virial"), virials[set_stt:set_end])
+            np.save(os.path.join(set_folder, "virial"),
+                    virials[set_stt:set_end])
         if "atom_pref" in data:
-            np.save(os.path.join(set_folder, "atom_pref"), atom_pref[set_stt:set_end])
+            np.save(os.path.join(set_folder, "atom_pref"),
+                    atom_pref[set_stt:set_end])

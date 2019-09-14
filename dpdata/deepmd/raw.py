@@ -5,9 +5,8 @@ import numpy as np
 
 def load_type(folder, type_map=None):
     data = {}
-    data["atom_types"] = np.loadtxt(os.path.join(folder, "type.raw"), ndmin=1).astype(
-        int
-    )
+    data["atom_types"] = np.loadtxt(os.path.join(folder, "type.raw"),
+                                    ndmin=1).astype(int)
     ntypes = np.max(data["atom_types"]) + 1
     data["atom_numbs"] = []
     for ii in range(ntypes):
@@ -35,13 +34,15 @@ def to_system_data(folder, type_map=None, labels=True):
         data["coords"] = np.reshape(data["coords"], [nframes, -1, 3])
         if labels:
             if os.path.exists(os.path.join(folder, "energy.raw")):
-                data["energies"] = np.loadtxt(os.path.join(folder, "energy.raw"))
+                data["energies"] = np.loadtxt(
+                    os.path.join(folder, "energy.raw"))
                 data["energies"] = np.reshape(data["energies"], [nframes])
             if os.path.exists(os.path.join(folder, "force.raw")):
                 data["forces"] = np.loadtxt(os.path.join(folder, "force.raw"))
                 data["forces"] = np.reshape(data["forces"], [nframes, -1, 3])
             if os.path.exists(os.path.join(folder, "virial.raw")):
-                data["virials"] = np.loadtxt(os.path.join(folder, "virial.raw"))
+                data["virials"] = np.loadtxt(os.path.join(
+                    folder, "virial.raw"))
                 data["virials"] = np.reshape(data["virials"], [nframes, 3, 3])
         return data
     else:
@@ -52,19 +53,18 @@ def dump(folder, data):
     os.makedirs(folder, exist_ok=True)
     nframes = data["cells"].shape[0]
     np.savetxt(os.path.join(folder, "type.raw"), data["atom_types"], fmt="%d")
-    np.savetxt(os.path.join(folder, "box.raw"), np.reshape(data["cells"], [nframes, 9]))
-    np.savetxt(
-        os.path.join(folder, "coord.raw"), np.reshape(data["coords"], [nframes, -1])
-    )
+    np.savetxt(os.path.join(folder, "box.raw"),
+               np.reshape(data["cells"], [nframes, 9]))
+    np.savetxt(os.path.join(folder, "coord.raw"),
+               np.reshape(data["coords"], [nframes, -1]))
     if "energies" in data:
         np.savetxt(
             os.path.join(folder, "energy.raw"),
             np.reshape(data["energies"], [nframes, 1]),
         )
     if "forces" in data:
-        np.savetxt(
-            os.path.join(folder, "force.raw"), np.reshape(data["forces"], [nframes, -1])
-        )
+        np.savetxt(os.path.join(folder, "force.raw"),
+                   np.reshape(data["forces"], [nframes, -1]))
     if "virials" in data:
         np.savetxt(
             os.path.join(folder, "virial.raw"),

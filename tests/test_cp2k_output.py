@@ -26,7 +26,8 @@ class TestCP2KSinglePointEnergy:
         cell = np.array(cell)
         for ii in range(cell.shape[0]):
             for jj in range(cell.shape[1]):
-                self.assertEqual(self.system.data["cells"][0][ii][jj], cell[ii][jj])
+                self.assertEqual(self.system.data["cells"][0][ii][jj],
+                                 cell[ii][jj])
         fp.close()
 
     def test_coord(self):
@@ -37,7 +38,8 @@ class TestCP2KSinglePointEnergy:
         coord = np.array(coord)
         for ii in range(coord.shape[0]):
             for jj in range(coord.shape[1]):
-                self.assertEqual(self.system.data["coords"][0][ii][jj], coord[ii][jj])
+                self.assertEqual(self.system.data["coords"][0][ii][jj],
+                                 coord[ii][jj])
         fp.close()
 
     def test_force(self):
@@ -50,9 +52,8 @@ class TestCP2KSinglePointEnergy:
         force = np.array(force)
         for ii in range(force.shape[0]):
             for jj in range(force.shape[1]):
-                self.assertEqual(
-                    self.system.data["forces"][0][ii][jj], force[ii][jj] * eV / angstrom
-                )
+                self.assertEqual(self.system.data["forces"][0][ii][jj],
+                                 force[ii][jj] * eV / angstrom)
         fp.close()
 
     def test_energy(self):
@@ -63,7 +64,8 @@ class TestCP2KSinglePointEnergy:
 
 class TestCP2KLabeledOutput(unittest.TestCase, TestCP2KSinglePointEnergy):
     def setUp(self):
-        self.system = dpdata.LabeledSystem("cp2k/cp2k_output", fmt="cp2k/output")
+        self.system = dpdata.LabeledSystem("cp2k/cp2k_output",
+                                           fmt="cp2k/output")
 
 
 if __name__ == "__main__":

@@ -22,9 +22,8 @@ class TestGaussianLog:
 
 class TestGaussianLoadLog(unittest.TestCase, TestGaussianLog):
     def setUp(self):
-        self.system = dpdata.LabeledSystem(
-            "gaussian/methane.gaussianlog", fmt="gaussian/log"
-        )
+        self.system = dpdata.LabeledSystem("gaussian/methane.gaussianlog",
+                                           fmt="gaussian/log")
 
 
 class TestNonCoveragedGaussianLog:
@@ -53,11 +52,11 @@ class TestNonCoveragedGaussianLog:
         self.assertFalse("virials" in self.system.data)
 
 
-class TestNonCoveragedGaussianLoadLog(unittest.TestCase, TestNonCoveragedGaussianLog):
+class TestNonCoveragedGaussianLoadLog(unittest.TestCase,
+                                      TestNonCoveragedGaussianLog):
     def setUp(self):
-        self.system = dpdata.LabeledSystem(
-            "gaussian/noncoveraged.gaussianlog", fmt="gaussian/log"
-        )
+        self.system = dpdata.LabeledSystem("gaussian/noncoveraged.gaussianlog",
+                                           fmt="gaussian/log")
 
 
 if __name__ == "__main__":

@@ -25,7 +25,7 @@ def system_info(lines, type_idx_zero=False):
                 assert atom_numbs == atom_numbs_, "in consistent numb atoms in OUTCAR"
     assert nelm is not None, "cannot find maximum steps for each SC iteration"
     assert atom_numbs is not None, "cannot find ion type info in OUTCAR"
-    atom_names = atom_names[: len(atom_numbs)]
+    atom_names = atom_names[:len(atom_numbs)]
     atom_types = []
     for idx, ii in enumerate(atom_numbs):
         for jj in range(ii):
@@ -54,7 +54,8 @@ def get_frames(fname, begin=0, step=1):
     fp = open(fname)
     blk = get_outcar_block(fp)
 
-    atom_names, atom_numbs, atom_types, nelm = system_info(blk, type_idx_zero=True)
+    atom_names, atom_numbs, atom_types, nelm = system_info(blk,
+                                                           type_idx_zero=True)
     ntot = sum(atom_numbs)
 
     all_coords = []
@@ -67,8 +68,7 @@ def get_frames(fname, begin=0, step=1):
     while len(blk) > 0:
         if cc >= begin and (cc - begin) % step == 0:
             coord, cell, energy, force, virial, is_converge = analyze_block(
-                blk, ntot, nelm
-            )
+                blk, ntot, nelm)
             if is_converge:
                 if len(coord) == 0:
                     break
@@ -124,7 +124,9 @@ def analyze_block(lines, ntot, nelm):
         elif "VOLUME and BASIS" in ii:
             for dd in range(3):
                 tmp_l = lines[idx + 5 + dd]
-                cell.append([float(ss) for ss in tmp_l.replace("-", " -").split()[0:3]])
+                cell.append([
+                    float(ss) for ss in tmp_l.replace("-", " -").split()[0:3]
+                ])
         elif "in kB" in ii:
             tmp_v = [float(ss) for ss in ii.split()[2:8]]
             virial = np.zeros([3, 3])
