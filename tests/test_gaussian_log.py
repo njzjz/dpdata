@@ -4,53 +4,58 @@ import unittest
 from context import dpdata
 from comp_sys import CompLabeledSys
 
-class TestGaussianLog :
-    def test_atom_names(self) :
-        self.assertEqual(self.system.data['atom_names'], ['C','H'])
 
-    def test_atom_numbs(self) :
+class TestGaussianLog:
+    def test_atom_names(self):
+        self.assertEqual(self.system.data['atom_names'], ['C', 'H'])
+
+    def test_atom_numbs(self):
         self.assertEqual(self.system.data['atom_numbs'], [1, 4])
 
-    def test_atom_types(self) :
-        for ii in range(0,1) :
+    def test_atom_types(self):
+        for ii in range(0, 1):
             self.assertEqual(self.system.data['atom_types'][ii], 0)
-        for ii in range(1,5) :
+        for ii in range(1, 5):
             self.assertEqual(self.system.data['atom_types'][ii], 1)
 
-class TestGaussianLoadLog(unittest.TestCase, TestGaussianLog):
-    def setUp (self) :
-        self.system = dpdata.LabeledSystem('gaussian/methane.gaussianlog', 
-                                           fmt = 'gaussian/log')
 
-class TestNonCoveragedGaussianLog :
-    def test_atom_names(self) :
+class TestGaussianLoadLog(unittest.TestCase, TestGaussianLog):
+    def setUp(self):
+        self.system = dpdata.LabeledSystem('gaussian/methane.gaussianlog',
+                                           fmt='gaussian/log')
+
+
+class TestNonCoveragedGaussianLog:
+    def test_atom_names(self):
         self.assertEqual(self.system.data['atom_names'], [])
 
-    def test_atom_numbs(self) :
+    def test_atom_numbs(self):
         self.assertEqual(self.system.data['atom_numbs'], [])
 
-    def test_atom_types(self) :
+    def test_atom_types(self):
         self.assertEqual(self.system.data['atom_types'], [])
 
-    def test_cells(self) :
+    def test_cells(self):
         self.assertEqual(self.system.data['cells'], [])
 
-    def test_coords(self) :
+    def test_coords(self):
         self.assertEqual(self.system.data['coords'], [])
 
-    def test_energies(self) :
+    def test_energies(self):
         self.assertEqual(self.system.data['energies'], [])
 
-    def test_forces(self) :
+    def test_forces(self):
         self.assertEqual(self.system.data['forces'], [])
 
-    def test_virials(self) :
+    def test_virials(self):
         self.assertFalse('virials' in self.system.data)
 
+
 class TestNonCoveragedGaussianLoadLog(unittest.TestCase, TestNonCoveragedGaussianLog):
-    def setUp (self) :
+    def setUp(self):
         self.system = dpdata.LabeledSystem('gaussian/noncoveraged.gaussianlog',
-                                           fmt = 'gaussian/log')
+                                           fmt='gaussian/log')
+
 
 if __name__ == '__main__':
     unittest.main()

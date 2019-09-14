@@ -1,7 +1,7 @@
 
 import dpdata
 
-cp2k_output = dpdata.LabeledSystem('cp2k_output', fmt = 'cp2k/output')
+cp2k_output = dpdata.LabeledSystem('cp2k_output', fmt='cp2k/output')
 print(cp2k_output['atom_names'])
 print(cp2k_output['atom_numbs'])
 print(cp2k_output['atom_types'])

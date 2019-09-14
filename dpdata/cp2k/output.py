@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def get_frames (fname) :
+def get_frames(fname):
     coord_flag = False
     force_flag = False
     eV = 2.72113838565563E+01
@@ -12,37 +12,37 @@ def get_frames (fname) :
     coord = []
     force = []
 
-    for idx, ii in enumerate(fp) :
-        if 'CELL| Vector' in ii :
+    for idx, ii in enumerate(fp):
+        if 'CELL| Vector' in ii:
             cell.append(ii.split()[4:7])
-        if 'Atom  Kind  Element' in ii :
+        if 'Atom  Kind  Element' in ii:
             coord_flag = True
             coord_idx = idx
         # get the coord block info
-        if coord_flag :
-            if (idx > coord_idx + 1) :
-                if (ii == '\n') :
+        if coord_flag:
+            if (idx > coord_idx + 1):
+                if (ii == '\n'):
                     coord_flag = False
-                else :
+                else:
                     coord.append(ii.split()[4:7])
                     atom_symbol_list.append(ii.split()[2])
-        if 'ENERGY|' in ii :
+        if 'ENERGY|' in ii:
             energy = (ii.split()[8])
-        if ' Atom   Kind ' in ii :
+        if ' Atom   Kind ' in ii:
             force_flag = True
             force_idx = idx
-        if force_flag :
-            if (idx > force_idx) :
-                if 'SUM OF ATOMIC FORCES' in ii :
+        if force_flag:
+            if (idx > force_idx):
+                if 'SUM OF ATOMIC FORCES' in ii:
                     force_flag = False
-                else :
+                else:
                     force.append(ii.split()[3:6])
     fp.close()
     assert(coord), "cannot find coords"
     assert(energy), "cannot find energies"
     assert(force), "cannot find forces"
 
-    #conver to float array and add extra dimension for nframes
+    # conver to float array and add extra dimension for nframes
     cell = np.array(cell)
     cell = cell.astype(np.float)
     cell = cell[np.newaxis, :, :]
@@ -60,11 +60,11 @@ def get_frames (fname) :
     tmp_names, symbol_idx = np.unique(atom_symbol_list, return_index=True)
     atom_types = []
     atom_numbs = []
-    #preserve the atom_name order
+    # preserve the atom_name order
     atom_names = atom_symbol_list[np.sort(symbol_idx)]
     for jj in atom_symbol_list:
         for idx, ii in enumerate(atom_names):
-            if (jj == ii) :
+            if (jj == ii):
                 atom_types.append(idx)
     for idx in range(len(atom_names)):
         atom_numbs.append(atom_types.count(idx))
@@ -72,5 +72,3 @@ def get_frames (fname) :
     atom_types = np.array(atom_types)
 
     return list(atom_names), atom_numbs, atom_types, cell, coord, energy, force
-
-
