@@ -1,9 +1,11 @@
 import os
 import shutil
-import numpy as np
 import unittest
+
+import numpy as np
+from comp_sys import CompLabeledSys
+from comp_sys import CompSys
 from context import dpdata
-from comp_sys import CompLabeledSys, CompSys
 
 
 class TestDeepmdLoadRaw(unittest.TestCase, CompLabeledSys):

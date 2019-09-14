@@ -1,8 +1,9 @@
 import os
-import numpy as np
 import unittest
-from context import dpdata
+
+import numpy as np
 from comp_sys import CompSys
+from context import dpdata
 from poscars.poscar_ref_oh import TestPOSCARoh
 
 
