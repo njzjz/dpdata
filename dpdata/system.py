@@ -932,22 +932,6 @@ class LabeledSystem (System):
         # return ('virials' in self.data) and (len(self.data['virials']) > 0)
         return ('virials' in self.data)
 
-    @register_from_funcs.register_funcs('db')
-    @register_from_funcs.register_funcs('ase/db')
-    def from_ase_db(self, file_name, begin = 0, step = 1) :
-        self.data['atom_names'], \
-            self.data['atom_numbs'], \
-            self.data['atom_types'], \
-            self.data['cells'], \
-            self.data['coords'], \
-            self.data['energies'], \
-            self.data['forces'], \
-            tmp_virial, \
-            = dpdata.ase.db.get_frames(file_name, begin = begin, step = step)
-
-        # rotate the system to lammps convention
-        self.rot_lower_triangular()
-
     def affine_map_fv(self, trans, f_idx) :
         assert(np.linalg.det(trans) != 0)
         self.data['forces'][f_idx] = np.matmul(self.data['forces'][f_idx], trans)

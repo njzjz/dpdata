@@ -1,4 +1,5 @@
 from dpdata.format import Format
+import dpdata.ase.db
 
 
 @Format.register("ase/structure")
@@ -50,3 +51,22 @@ class ASEStructureFormat(Format):
             structures.append(structure)
 
         return structures
+
+
+@Format.register("db")
+@Format.register("ase/db")
+class ASEStructureFormat(Format):
+    @Format.post("rot_lower_triangular")
+    def from_labeled_system(self, file_name, begin = 0, step = 1) :
+        data = {}
+        data['atom_names'], \
+            data['atom_numbs'], \
+            data['atom_types'], \
+            data['cells'], \
+            data['coords'], \
+            data['energies'], \
+            data['forces'], \
+            tmp_virial, \
+            = dpdata.ase.db.get_frames(file_name, begin = begin, step = step)
+        return data
+
