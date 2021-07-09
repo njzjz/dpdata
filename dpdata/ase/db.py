@@ -1,5 +1,8 @@
-from ase import Atom
-from ase.db import connect
+try:
+    from ase import Atom
+    from ase.db import connect
+except ModuleNotFoundError:
+    pass
 import numpy as np
 
 
