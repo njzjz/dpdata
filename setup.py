@@ -40,6 +40,9 @@ setuptools.setup(
               'dpdata/fhi_aims',
               'dpdata/gromacs',
               'dpdata/ase'
+              'dpdata/abacus',
+              'dpdata/rdkit',
+              'dpdata/plugins',
     ],
     package_data={'dpdata':['*.json']},
     classifiers=[
@@ -48,5 +51,9 @@ setuptools.setup(
     ],
     keywords='lammps vasp deepmd-kit',
     install_requires=install_requires,
+    extras_require={
+        'ase': ['ase'],
+        'amber': ['parmed'],
+    }
 )
 

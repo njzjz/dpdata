@@ -1,0 +1,30 @@
+name: Python package
+
+on:
+  - push
+  - pull_request
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.6, 3.7, 3.8]
+
+    steps:
+    - uses: actions/checkout@v2
+    # set up conda
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: conda-incubator/setup-miniconda@v2
+      with:
+        auto-activate-base: true
+        activate-environment: ""
+    # install rdkit and openbabel
+    - name: Install rdkit
+      run: conda create -c conda-forge -n my-rdkit-env python=${{ matrix.python-version }} rdkit openbabel;
+    - name: Install dependencies
+      run: source $CONDA/bin/activate my-rdkit-env && pip install .[amber] coverage codecov
+    - name: Test
+      run: source $CONDA/bin/activate my-rdkit-env && cd tests && coverage run --source=../dpdata -m unittest && cd .. && coverage combine tests/.coverage && coverage report
+    - name: Run codecov
+      run: source $CONDA/bin/activate my-rdkit-env && codecov

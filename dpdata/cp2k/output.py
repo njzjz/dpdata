@@ -14,7 +14,6 @@ delimiter_p2 = re.compile(r'^ \*+')
 delimiter_patterns.append(delimiter_p1)
 delimiter_patterns.append(delimiter_p2)
 avail_patterns = []
-
 avail_patterns.append(re.compile(r'^ INITIAL POTENTIAL ENERGY'))
 avail_patterns.append(re.compile(r'^ ENSEMBLE TYPE'))
 
@@ -22,17 +21,24 @@ class Cp2kSystems(object):
     """
     deal with cp2k outputfile
     """
-    def __init__(self, log_file_name, xyz_file_name):
+    def __init__(self, log_file_name, xyz_file_name, restart=False):
         self.log_file_object = open(log_file_name, 'r')
         self.xyz_file_object = open(xyz_file_name, 'r')
         self.log_block_generator = self.get_log_block_generator()
         self.xyz_block_generator = self.get_xyz_block_generator()
+        self.restart_flag = restart
         self.cell=None
+
+        if self.restart_flag:
+            self.handle_single_log_frame(next(self.log_block_generator))
+
     def __del__(self):
         self.log_file_object.close()
         self.xyz_file_object.close()
+
     def __iter__(self):
         return self
+
     def __next__(self):
         info_dict = {}
         log_info_dict = self.handle_single_log_frame(next(self.log_block_generator))
@@ -40,10 +46,10 @@ class Cp2kSystems(object):
         eq1 = [v1==v2 for v1,v2 in zip(log_info_dict['atom_numbs'], xyz_info_dict['atom_numbs'])]
         eq2 = [v1==v2 for v1,v2 in zip(log_info_dict['atom_names'], xyz_info_dict['atom_names'])]
         eq3 = [v1==v2 for v1,v2 in zip(log_info_dict['atom_types'], xyz_info_dict['atom_types'])]
-        assert all(eq1), (log_info_dict,xyz_info_dict,'There may be errors in the file')
-        assert all(eq2), (log_info_dict,xyz_info_dict,'There may be errors in the file')
-        assert all(eq3), (log_info_dict,xyz_info_dict,'There may be errors in the file')
-        assert log_info_dict['energies']==xyz_info_dict['energies'], (log_info_dict['energies'],xyz_info_dict['energies'],'There may be errors in the file')
+        assert all(eq1), (log_info_dict,xyz_info_dict,'There may be errors in the file. If it is a restart task; use restart=True')
+        assert all(eq2), (log_info_dict,xyz_info_dict,'There may be errors in the file. If it is a restart task; use restart=True')
+        assert all(eq3), (log_info_dict,xyz_info_dict,'There may be errors in the file. If it is a restart task; use restart=True')
+        assert log_info_dict['energies']==xyz_info_dict['energies'], (log_info_dict['energies'], xyz_info_dict['energies'],'There may be errors in the file')
         info_dict.update(log_info_dict)
         info_dict.update(xyz_info_dict)
         return info_dict
@@ -111,6 +117,7 @@ class Cp2kSystems(object):
                     force_lines.append(line)
             if energy_pattern_1.match(line):
                 energy = float(energy_pattern_1.match(line).groupdict()['number']) * AU_TO_EV
+                #print('1to', energy)
             if energy_pattern_2.match(line):
                 energy = float(energy_pattern_2.match(line).groupdict()['number']) * AU_TO_EV
             if cell_length_pattern.match(line):
@@ -190,9 +197,12 @@ class Cp2kSystems(object):
                 element_index +=1
                 element_dict[line_list[0]]=[element_index,1]
             atom_types_list.append(element_dict[line_list[0]][0])
-            coords_list.append([float(line_list[1])*AU_TO_ANG,
-                float(line_list[2])*AU_TO_ANG,
-                float(line_list[3])*AU_TO_ANG])
+            # coords_list.append([float(line_list[1])*AU_TO_ANG,
+            #     float(line_list[2])*AU_TO_ANG,
+            #     float(line_list[3])*AU_TO_ANG])
+            coords_list.append([float(line_list[1]),
+                float(line_list[2]),
+                float(line_list[3])])
         atom_names=list(element_dict.keys())
         atom_numbs=[]
         for ii in atom_names:
@@ -210,17 +220,22 @@ class Cp2kSystems(object):
 def get_frames (fname) :
     coord_flag = False
     force_flag = False
+    stress_flag = False
     eV = 2.72113838565563E+01 # hatree to eV
-    angstrom = 5.29177208590000E-01 # Bohrto Angstrom
+    angstrom = 5.29177208590000E-01 # Bohr to Angstrom
+    GPa = 160.21766208 # 1 eV/(Angstrom^3) = 160.21 GPa
     fp = open(fname)
     atom_symbol_list = []
     cell = []
     coord = []
     force = []
+    stress = []
+    cell_count = 0
     coord_count = 0
     for idx, ii in enumerate(fp) :
-        if 'CELL| Vector' in ii :
+        if ('CELL| Vector' in ii) and (cell_count < 3) :
             cell.append(ii.split()[4:7])
+            cell_count += 1
         if 'Atom  Kind  Element' in ii :
             coord_flag = True
             coord_idx = idx
@@ -244,6 +259,18 @@ def get_frames (fname) :
                     force_flag = False
                 else :
                     force.append(ii.split()[3:6])
+        # add reading stress tensor
+        if 'STRESS TENSOR [GPa' in ii :
+            stress_flag = True
+            stress_idx = idx
+        if stress_flag :
+            if (idx > stress_idx + 2):
+                if (ii == '\n') :
+                    stress_flag = False
+                else :
+                    stress.append(ii.split()[1:4])
+
+
     fp.close()
     assert(coord), "cannot find coords"
     assert(energy), "cannot find energies"
@@ -251,19 +278,36 @@ def get_frames (fname) :
 
     #conver to float array and add extra dimension for nframes
     cell = np.array(cell)
-    cell = cell.astype(np.float)
+    cell = cell.astype(float)
     cell = cell[np.newaxis, :, :]
     coord = np.array(coord)
-    coord = coord.astype(np.float)
+    coord = coord.astype(float)
     coord = coord[np.newaxis, :, :]
     atom_symbol_list = np.array(atom_symbol_list)
     force = np.array(force)
-    force = force.astype(np.float)
+    force = force.astype(float)
     force = force[np.newaxis, :, :]
+
+    # virial is not necessary
+    if stress:
+        stress = np.array(stress)
+        stress = stress.astype(float)
+        stress = stress[np.newaxis, :, :]
+        # stress to virial conversion, default unit in cp2k is GPa
+        # note the stress is virial = stress * volume
+        virial = stress * np.linalg.det(cell[0])/GPa
+    else:
+        virial = None
+
+    # force unit conversion, default unit in cp2k is hartree/bohr
     force = force * eV / angstrom
+    # energy unit conversion, default unit in cp2k is hartree
     energy = float(energy) * eV
     energy = np.array(energy)
     energy = energy[np.newaxis]
+
+
+
     tmp_names, symbol_idx = np.unique(atom_symbol_list, return_index=True)
     atom_types = []
     atom_numbs = []
@@ -278,7 +322,7 @@ def get_frames (fname) :
 
     atom_types = np.array(atom_types)
 
-    return list(atom_names), atom_numbs, atom_types, cell, coord, energy, force
+    return list(atom_names), atom_numbs, atom_types, cell, coord, energy, force, virial
 
 
 
