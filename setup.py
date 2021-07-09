@@ -39,7 +39,6 @@ setuptools.setup(
               'dpdata/amber',
               'dpdata/fhi_aims',
               'dpdata/gromacs',
-              'dpdata/ase'
               'dpdata/abacus',
               'dpdata/rdkit',
               'dpdata/plugins',
