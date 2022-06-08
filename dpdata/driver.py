@@ -1,6 +1,5 @@
 """Driver plugin system."""
-from typing import Callable, TYPE_CHECKING
-
+from typing import Callable, List, Union, TYPE_CHECKING
 from .plugin import Plugin
 from abc import ABC, abstractmethod
 
@@ -122,21 +121,59 @@ class Driver(ABC):
 
 @Driver.register("hybrid")
 class HybridDriver(Driver):
-    def __init__(self, drivers: dict) -> None:
+    """Hybrid driver, with mixed drivers.
+
+    Parameters
+    ----------
+    drivers : list[dict, Driver]
+        list of drivers or drivers dict. For a dict, it should
+        contain `type` as the name of the driver, and others
+        are arguments of the driver.
+
+    Raises
+    ------
+    TypeError
+        The value of `drivers` is not a dict or `Driver`.
+
+    Examples
+    --------
+    >>> driver = HybridDriver([
+    ...     {"type": "sqm", "qm_theory": "DFTB3"},
+    ...     {"type": "dp", "dp": "frozen_model.pb"},
+    ... ])
+    This driver is the hybrid of SQM and DP.
+    """
+    def __init__(self, drivers: List[Union[dict, Driver]]) -> None:
         self.drivers = []
-        for key, driver in drivers.items():
+        for driver in drivers:
             if isinstance(driver, Driver):
                 self.drivers.append(driver)
             elif isinstance(driver, dict):
-                self.drivers.append(Driver.get_driver(key)(**driver))
+                type = driver["type"]
+                del driver["type"]
+                self.drivers.append(Driver.get_driver(type)(**driver))
             else:
                 raise TypeError("driver should be Driver or dict")
 
     def label(self, data: dict) -> dict:
+        """Label a system data.
+
+        Energies and forces are the sum of those of each driver.
+        
+        Parameters
+        ----------
+        data : dict
+            data with coordinates and atom types
+        
+        Returns
+        -------
+        dict
+            labeled data with energies and forces
+        """
         for ii, driver in enumerate(self.drivers):
-            lb_data = driver.label(data)
+            lb_data = driver.label(data.copy())
             if ii == 0:
-                labeled_data = lb_data
+                labeled_data = lb_data.copy()
             else:
                 labeled_data['energies'] += lb_data ['energies']
                 labeled_data['forces'] += lb_data ['forces']
