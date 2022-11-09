@@ -167,6 +167,7 @@ class System (MSONable) :
         DataType("cells", np.ndarray, (Axis.NFRAMES, 3, 3)),
         DataType("coords", np.ndarray, (Axis.NFRAMES, Axis.NATOMS, 3)),
         DataType("nopbc", bool, required=False),
+        DataType("formal_charges", np.ndarray, (Axis.NFRAMES,), required=False),
     )
 
     def __init__ (self,

@@ -77,7 +77,10 @@ def parse_sqm_out(fname):
 def make_sqm_in(data, fname=None, frame_idx=0, **kwargs):
     symbols = [data['atom_names'][ii] for ii in data['atom_types']]
     atomic_numbers = [ELEMENTS.index(ss) + 1 for ss in symbols]
-    charge = kwargs.get("charge", 0)
+    if 'formal_charges' in data:
+        charge = int(data['formal_charges'][frame_idx])
+    else:
+        charge = kwargs.get("charge", 0)
 
     # multiplicity
     mult = kwargs.get("mult", 1)

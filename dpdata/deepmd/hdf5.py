@@ -62,6 +62,7 @@ def to_system_data(f: Union[h5py.File, h5py.Group],
         'energies': {'fn': 'energy', 'labeled': True, 'shape': tuple(), 'required': False},
         'forces': {'fn': 'force', 'labeled': True, 'shape': (natoms,3), 'required': False},
         'virials': {'fn': 'virial', 'labeled': True, 'shape': (3,3), 'required': False},
+        'formal_charges': {'fn': 'formal_charges', 'labeled': False, 'shape': tuple(), 'required': False},
     }
     
     for dt, prop in data_types.items():
@@ -132,6 +133,7 @@ def dump(f: Union[h5py.File, h5py.Group],
         'energies': {'fn': 'energy', 'shape': (nframes,), 'dump': True},
         'forces': {'fn': 'force', 'shape': (nframes, -1), 'dump': True},
         'virials': {'fn': 'virial', 'shape': (nframes, 9), 'dump': True},
+        'formal_charges': {'fn': 'formal_charges', 'shape': (nframes,), 'dump': True},
     }
     for dt, prop in data_types.items():
         if dt in data:
