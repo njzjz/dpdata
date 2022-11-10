@@ -135,7 +135,7 @@ class ASEStructureFormat(Format):
                 symbols=species, positions=data['coords'][ii], pbc=not data.get('nopbc', False), cell=data['cells'][ii])
             if 'formal_charges' in data:
                 natoms = data['coords'].shape[1]
-                structure.set_initial_charges(np.ones(natoms) / data['formal_charges'][ii])
+                structure.set_initial_charges(np.ones(natoms) * data['formal_charges'][ii] / natoms)
             structures.append(structure)
 
         return structures
