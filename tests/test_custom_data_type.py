@@ -48,7 +48,7 @@ class TestDeepmdLoadDumpComp(unittest.TestCase):
 class TestDeepmdLoadDumpCompAny(unittest.TestCase):
     def setUp(self):
         self.system = dpdata.LabeledSystem("poscars/OUTCAR.h2o.md", fmt="vasp/outcar")
-        self.bar = np.ones((len(self.system), self.system.get_atom_numbs(), 2))
+        self.bar = np.ones((len(self.system), self.system.get_natoms(), 2))
         self.system.data["bar"] = self.bar
         self.system.check_data()
 
