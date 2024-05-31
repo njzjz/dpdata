@@ -1,6 +1,15 @@
 [build-system]
-requires = ["setuptools>=61", "setuptools_scm[toml]>=7"]
-build-backend = "setuptools.build_meta"
+requires = [
+    "hatchling",
+    "hatch-vcs",
+    # generate mypy stub, which doesn't only need mypy,
+    # but also need all necessary runtime dependency for dpdata.system
+    # (as it generates methods dynamically)
+    "mypy",
+    "numpy",
+    "scipy",
+]
+build-backend = "hatchling.build"
 
 [project]
 name = "dpdata"
@@ -37,7 +46,7 @@ Homepage = "https://github.com/deepmodeling/dpdata"
 documentation = "https://docs.deepmodeling.com/projects/dpdata"
 repository = "https://github.com/deepmodeling/dpdata"
 
-[project.entry-points.console_scripts]
+[project.scripts]
 dpdata = "dpdata.cli:dpdata_cli"
 
 [project.optional-dependencies]
@@ -64,14 +73,13 @@ benchmark = [
     'pytest-codspeed',
 ]
 
-[tool.setuptools.packages.find]
-include = ["dpdata*"]
+[tool.hatch.version]
+source = "vcs"
 
-[tool.setuptools.package-data]
-dpdata = ['*.json']
+[tool.hatch.build.hooks.vcs]
+version-file = "_version.py"
 
-[tool.setuptools_scm]
-write_to = "dpdata/_version.py"
+[tool.hatch.build.targets.wheel.hooks.custom]
 
 [tool.isort]
 profile = "black"
