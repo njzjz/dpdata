@@ -99,6 +99,7 @@ class System:
         DataType("real_atom_names", list, (Axis.NTYPES,), required=False),
         DataType("nopbc", bool, required=False),
     )
+    data: dict[str, Any]
 
     def __init__(
         self,
@@ -1333,6 +1334,8 @@ class LabeledSystem(System):
 
 class MultiSystems:
     """A set containing several systems."""
+
+    systems: dict[str, System]
 
     def __init__(self, *systems, type_map=None):
         """Parameters
