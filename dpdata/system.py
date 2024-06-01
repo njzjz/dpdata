@@ -100,6 +100,11 @@ class System:
         DataType("nopbc", bool, required=False),
     )
 
+    @property
+    def data(self):
+        """The raw data of System class."""
+        return self._data
+
     def __init__(
         self,
         # some formats do not use string as input
@@ -183,7 +188,7 @@ class System:
         **kwargs : dict
             other parameters
         """
-        self.data = {}
+        self._data = {}
         self.data["atom_numbs"] = []
         self.data["atom_names"] = []
         self.data["atom_types"] = []
@@ -192,7 +197,7 @@ class System:
         self.data["coords"] = []
 
         if data:
-            self.data = data
+            self._data = data
             self.check_data()
             return
         if file_name is None:
@@ -243,7 +248,7 @@ class System:
                 for dd in data:
                     self.append(System(data=dd))
             else:
-                self.data = {**self.data, **data}
+                self._data = {**self.data, **data}
                 self.check_data()
             if hasattr(fmtobj.from_system, "post_func"):
                 for post_f in fmtobj.from_system.post_func:  # type: ignore
@@ -480,7 +485,7 @@ class System:
             return False
         elif not len(self.data["atom_numbs"]):
             # this system is non-converged but the system to append is converged
-            self.data = system.data.copy()
+            self._data = system.data.copy()
             return False
         if system.uniq_formula != self.uniq_formula:
             raise RuntimeError(
@@ -559,7 +564,7 @@ class System:
         type_map : list
             type_map
         """
-        self.data = sort_atom_names(self.data, type_map=type_map)
+        self._data = sort_atom_names(self.data, type_map=type_map)
 
     def check_type_map(self, type_map: list[str] | None):
         """Assign atom_names to type_map if type_map is given and different from
@@ -743,7 +748,7 @@ class System:
 
     def add_atom_names(self, atom_names: list[str]):
         """Add atom_names that do not exist."""
-        self.data = add_atom_names(self.data, atom_names)
+        self._data = add_atom_names(self.data, atom_names)
 
     def replicate(self, ncopy: list[int] | tuple[int, int, int]):
         """Replicate the each frame  in the system in 3 dimensions.
@@ -920,7 +925,7 @@ class System:
     def shuffle(self):
         """Shuffle frames randomly."""
         idx = np.random.permutation(self.get_nframes())
-        self.data = self.sub_system(idx).data
+        self._data = self.sub_system(idx).data
         return idx
 
     def predict(
@@ -1206,7 +1211,7 @@ class LabeledSystem(System):
                 for dd in data:
                     self.append(LabeledSystem(data=dd))
             else:
-                self.data = {**self.data, **data}
+                self._data = {**self.data, **data}
                 self.check_data()
             if hasattr(fmtobj.from_labeled_system, "post_func"):
                 for post_f in fmtobj.from_labeled_system.post_func:  # type: ignore
@@ -1334,6 +1339,10 @@ class LabeledSystem(System):
 class MultiSystems:
     """A set containing several systems."""
 
+    @property
+    def systems(self) -> dict[str, System]:
+        return self._systems
+
     def __init__(self, *systems, type_map=None):
         """Parameters
         ----------
@@ -1342,7 +1351,7 @@ class MultiSystems:
         type_map : list of str
             Maps atom type to name
         """
-        self.systems: dict[str, System] = {}
+        self._systems: dict[str, System] = {}
         if type_map is not None:
             self.atom_names: list[str] = type_map
         else:
@@ -1514,7 +1523,7 @@ class MultiSystems:
                 each_system.add_atom_names(new_in_system)
                 each_system.sort_atom_names(type_map=self.atom_names)
                 new_systems[each_system.formula] = each_system
-            self.systems = new_systems
+            self._systems = new_systems
         if len(new_in_self):
             # Previous atom_name not in this system
             system.add_atom_names(new_in_self)

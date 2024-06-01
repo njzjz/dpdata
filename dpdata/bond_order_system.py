@@ -171,7 +171,7 @@ class BondOrderSystem(System):
     def from_rdkit_mol(self, rdkit_mol):
         """Initialize from a rdkit.Chem.rdchem.Mol object."""
         rdkit_mol = self.sanitizer.sanitize(rdkit_mol)
-        self.data = dpdata.rdkit.utils.mol_to_system_data(rdkit_mol)
+        self._data = dpdata.rdkit.utils.mol_to_system_data(rdkit_mol)
         self.data["bond_dict"] = dict(
             [(f"{int(bond[0])}-{int(bond[1])}", bond[2]) for bond in self.data["bonds"]]
         )
