@@ -24,7 +24,7 @@ class CustomBuildHook(BuildHookInterface):
                 "dpdata.system",
                 "--inspect-mode",
                 "--output",
-                ".",
+                self.root,
             ]
         )
-        
+        build_data['artifacts'].append('/dpdata/system.pyi')
