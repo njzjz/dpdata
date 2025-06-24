@@ -2,10 +2,7 @@
 
 from __future__ import annotations
 
-try:
-    import parmed
-except ImportError:
-    pass
+import parmed
 
 
 def pick_by_amber_mask(param, maskstr, coords=None):
