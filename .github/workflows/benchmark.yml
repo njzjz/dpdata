@@ -6,7 +6,8 @@ on:
 
 jobs:
   benchmark:
-    runs-on: ubuntu-latest
+    if: ${{ github.repository_owner == 'deepmodeling' }}
+    runs-on: codspeed-macro
     steps:
     - uses: actions/checkout@v4
     - name: Set up Python
